@@ -1,6 +1,11 @@
-# Delete a Book Instance
+# Deleting a Book in Django Shell
 
 ```python
+from bookshelf.models import Book
+
+# Retrieve and delete the book
 book = Book.objects.get(title="Nineteen Eighty-Four")
 book.delete()
-print("Book deleted successfully!")
+
+# Verify deletion
+Book.objects.all()
