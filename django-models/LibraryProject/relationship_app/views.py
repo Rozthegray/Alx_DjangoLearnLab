@@ -1,19 +1,14 @@
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import DetailView
-from .models import Book, Library  # ✅ Explicitly included Library
+from django.views.generic import DetailView  # ✅ Using DetailView for class-based view
+from .models import Book, Library  # ✅ Ensuring Library is imported
 
-# ✅ Function-based view for listing all books
+# ✅ Function-Based View for Listing All Books
 def list_books(request):
     books = Book.objects.all()
-    return render(request, "relationship_app/list_books.html", {"books": books})  # ✅ Fixed template reference
+    return render(request, "relationship_app/list_books.html", {"books": books})
 
-# ✅ Class-based view for displaying library details and listing its books
+# ✅ Class-Based View for Displaying Library Details
 class LibraryDetailView(DetailView):
     model = Library
-    template_name = "relationship_app/library_detail.html"  # ✅ Correct template reference
+    template_name = "relationship_app/library_detail.html"
     context_object_name = "library"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["books"] = self.object.books.all()  # ✅ Lists all books in the library
-        return context
