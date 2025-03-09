@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-jbj07*6)0pm!!w-@+%=^z!m%!9)3kd9u##t%4xcjvczzcs&+)-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False  # Set to False for production
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['yourdomain.com']  # Add your domain name here or use '*' for all hosts in development (not recommended in production)
 
 
 # Application definition
@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'bookshelf', 
+    'bookshelf',  # Your app
 ]
 
 MIDDLEWARE = [
@@ -47,7 +47,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',  # Protect against clickjacking
 ]
 
 ROOT_URLCONF = 'LibraryProject.urls'
@@ -55,7 +55,7 @@ ROOT_URLCONF = 'LibraryProject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [],  # Add paths to your template directories here
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'LibraryProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # Change to a more secure database like PostgreSQL for production
     }
 }
 
@@ -122,3 +122,40 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'bookshelf.CustomUser'
+
+
+# Security Settings
+
+# Ensure cookies are only sent over HTTPS
+CSRF_COOKIE_SECURE = True  # CSRF protection cookies will only be sent over HTTPS
+SESSION_COOKIE_SECURE = True  # Session cookies will only be sent over HTTPS
+
+# Protect against XSS attacks
+SECURE_BROWSER_XSS_FILTER = True
+
+# Clickjacking protection
+X_FRAME_OPTIONS = 'DENY'  # Prevent clickjacking by blocking the site from being embedded in an iframe
+
+# Prevent content type sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Enable SSL redirect (redirect all HTTP requests to HTTPS)
+SECURE_SSL_REDIRECT = True
+
+# Enable HTTP Strict Transport Security (HSTS) to enforce HTTPS
+SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Content Security Policy (CSP) - Add this for XSS protection
+# You will need to install django-csp middleware
+# pip install django-csp
+MIDDLEWARE += ['csp.middleware.CSPMiddleware']
+
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "https://trusted.cdn.com")  # Allow trusted CDNs for scripts
+CSP_STYLE_SRC = ("'self'", "https://fonts.googleapis.com")
+CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
+CSP_IMG_SRC = ("'self'",)
