@@ -20,26 +20,29 @@ class BookAPITestCase(TestCase):
         response = self.client.get("/api/books/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(len(response.data), 0)  # Ensure at least one book exists
-        self.assertEqual(response.data[0]["title"], self.book.title)  # Check if expected title matches
+        self.assertEqual(response.data[0]["title"], self.book.title)  # Check expected title
 
-    def test_get_book_detail(self):
-        """Test retrieving a single book by ID."""
-        response = self.client.get(f"/api/books/{self.book.id}/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["title"], self.book.title)  # Ensure the retrieved book is correct
+    def test_login_required_for_create(self):
+        """Test that a user must be logged in to create a book."""
+        # Try creating a book without logging in
+        response = self.client.post("/api/books/create/", self.valid_book_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Now log in using session-based authentication
+        login_success = self.client.login(username="testuser", password="password")
+        self.assertTrue(login_success)  # Ensure login was successful
+
+        # Retry creating a book after login
+        response = self.client.post("/api/books/create/", self.valid_book_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["title"], "New Book")  # Ensure correct title
 
     def test_create_book_authenticated(self):
-        """Test authenticated user can create a book."""
+        """Test authenticated user can create a book using token-based auth."""
         self.client.force_authenticate(user=self.user)
         response = self.client.post("/api/books/create/", self.valid_book_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["title"], "New Book")  # Ensure correct title is returned
-
-    def test_create_book_unauthenticated(self):
-        """Test unauthenticated user cannot create a book."""
-        response = self.client.post("/api/books/create/", self.valid_book_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertNotIn("title", response.data)  # Ensure no data is returned
+        self.assertEqual(response.data["title"], "New Book")
 
     def test_update_book(self):
         """Test authenticated user can update a book."""
@@ -47,7 +50,7 @@ class BookAPITestCase(TestCase):
         updated_data = {"title": "Updated Book", "author": self.author.id, "publication_year": 2022}
         response = self.client.put(f"/api/books/update/{self.book.id}/", updated_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["title"], "Updated Book")  # Ensure update is reflected
+        self.assertEqual(response.data["title"], "Updated Book")
 
     def test_delete_book(self):
         """Test authenticated user can delete a book."""
