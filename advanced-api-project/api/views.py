@@ -1,48 +1,29 @@
-from rest_framework import generics, permissions
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .models import Book
 from .serializers import BookSerializer
 
-class BookListView(generics.ListAPIView):
-    """
-    Handles retrieving all books.
-    No authentication is required.
-    """
+class BookListView(generics.ListCreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]  # Publicly accessible
+    permission_classes = [IsAuthenticatedOrReadOnly]  # ✅ Read-only for unauthenticated users
 
 class BookDetailView(generics.RetrieveAPIView):
-    """
-    Handles retrieving a single book by ID.
-    No authentication is required.
-    """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]  # ✅ Read-only for unauthenticated users
 
 class BookCreateView(generics.CreateAPIView):
-    """
-    Handles adding a new book.
-    Requires authentication.
-    """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # ✅ Only authenticated users can create books
 
 class BookUpdateView(generics.UpdateAPIView):
-    """
-    Handles updating an existing book.
-    Requires authentication.
-    """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # ✅ Only authenticated users can update books
 
 class BookDeleteView(generics.DestroyAPIView):
-    """
-    Handles deleting a book.
-    Requires authentication.
-    """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # ✅ Only authenticated users can delete books
