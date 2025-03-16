@@ -136,3 +136,9 @@ INSTALLED_APPS = [
     # Your app
     'api',
 ]
+
+INSTALLED_APPS = [
+    ...
+    'rest_framework',
+    'api',
+]
