@@ -11,6 +11,15 @@ class BookListView(generics.ListAPIView):
     serializer_class = BookSerializer
     permission_classes = [permissions.AllowAny]  # Publicly accessible
 
+class BookDetailView(generics.RetrieveAPIView):
+    """
+    Handles retrieving a single book by ID.
+    No authentication is required.
+    """
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.AllowAny]
+
 class BookCreateView(generics.CreateAPIView):
     """
     Handles adding a new book.
