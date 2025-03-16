@@ -9,4 +9,8 @@ class Author(models.Model):
 
 class Book(models.Model):
     title = models.CharField(max_length=255)
-    author = models.ForeignKey(Author, related_name="
+    author = models.ForeignKey(Author, related_name="books", on_delete=models.CASCADE)
+    genre = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.title
