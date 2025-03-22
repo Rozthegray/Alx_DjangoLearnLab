@@ -6,6 +6,20 @@ from .forms import CommentForm
 from django.shortcuts import render
 from django.db.models import Q
 from .models import Post
+from django.views.generic import ListView
+from django.shortcuts import get_object_or_404
+from .models import Post
+from taggit.models import Tag
+
+class PostByTagListView(ListView):
+    model = Post
+    template_name = 'blog/post_list.html'
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        tag = get_object_or_404(Tag, slug=self.kwargs.get('tag_slug'))
+        return Post.objects.filter(tags__in=[tag])
+
 
 def search_posts(request):
     query = request.GET.get('q')
