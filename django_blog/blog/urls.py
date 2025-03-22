@@ -4,6 +4,15 @@ from .views import (
     CommentUpdateView,
     CommentDeleteView,
 )
+from django.urls import path
+from .views import PostByTagListView
+
+urlpatterns = [
+    # Existing URLs...
+    
+    path('tags/<slug:tag_slug>/', PostByTagListView.as_view(), name='posts_by_tag'),
+]
+
 
 from django.urls import path
 from .views import search_posts
