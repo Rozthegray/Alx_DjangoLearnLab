@@ -1,11 +1,12 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import PostViewSet, CommentViewSet
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from .models import Post
+from .serializers import PostSerializer
 
-router = DefaultRouter()
-router.register(r'posts', PostViewSet)
-router.register(r'comments', CommentViewSet)
+class FeedView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
 
-urlpatterns = [
-    path('', include(router.urls)),
-]
+    def get_queryset(self):
+        user = self.request.user
+        return Post.objects.filter(author__in=user.following.all()).order_by('-created_at')
