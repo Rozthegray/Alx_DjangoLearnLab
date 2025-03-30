@@ -38,14 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # Third-party apps
     'rest_framework',
-    'rest_framework.authtoken',
-
-    # Custom apps
-    'accounts',
+    'accounts',  # Your existing app
+    'posts',  # Add this line
 ]
+
 
 
 MIDDLEWARE = [
