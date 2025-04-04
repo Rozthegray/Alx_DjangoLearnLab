@@ -1,46 +1,58 @@
-from rest_framework.views import APIView
+# posts/views.py
+
+from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import permissions
 from django.shortcuts import get_object_or_404
-from posts.models import Post, Like
+from .models import Post, Like
 from notifications.models import Notification
-from django.utils import timezone
+from django.contrib.contenttypes.models import ContentType
 
-class LikePostView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+@api_view(['POST'])
+def like_post(request, pk):
+    # Use get_object_or_404 to retrieve the post object
+    post = get_object_or_404(Post, pk=pk)
 
-    def post(self, request, pk):
-        # Use get_object_or_404 to get the post by pk
-        post = get_object_or_404(Post, pk=pk)
+    # Ensure the user is authenticated
+    if not request.user.is_authenticated:
+        return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # Create or retrieve the Like object
-        like, created = Like.objects.get_or_create(user=request.user, post=post)
+    # Prevent liking a post multiple times
+    like, created = Like.objects.get_or_create(user=request.user, post=post)
 
-        if created:
-            # Create a notification when a post is liked
-            Notification.objects.create(
-                recipient=post.author,
-                actor=request.user,
-                verb="liked your post",
-                target=post,
-                timestamp=timezone.now()
-            )
+    if not created:
+        return Response({"detail": "You have already liked this post."}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"detail": "Post liked successfully."}, status=201)
+    # Create notification for the post's author
+    recipient = post.user  # The user who created the post
+    verb = f"liked your post: {post.content[:20]}..."  # Notification verb
 
+    # Create a notification instance
+    notification = Notification.objects.create(
+        recipient=recipient,
+        actor=request.user,
+        verb=verb,
+        target_ct=ContentType.objects.get_for_model(post),
+        target_id=post.id
+    )
 
-class UnlikePostView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    return Response({"detail": "Post liked and notification sent."}, status=status.HTTP_201_CREATED)
 
-    def post(self, request, pk):
-        # Use get_object_or_404 to get the post by pk
-        post = get_object_or_404(Post, pk=pk)
+@api_view(['DELETE'])
+def unlike_post(request, pk):
+    # Use get_object_or_404 to retrieve the post object
+    post = get_object_or_404(Post, pk=pk)
 
-        # Check if the Like object exists, then delete it
-        like = Like.objects.filter(user=request.user, post=post).first()
+    # Ensure the user is authenticated
+    if not request.user.is_authenticated:
+        return Response({"detail": "Authentication credentials were not provided."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if like:
-            like.delete()
-            return Response({"detail": "Post unliked successfully."}, status=200)
-        else:
-            return Response({"
+    # Prevent unliking a post that wasn't liked
+    like = Like.objects.filter(user=request.user, post=post).first()
+
+    if not like:
+        return Response({"detail": "You have not liked this post."}, status=status.HTTP_400_BAD_REQUEST)
+
+    like.delete()  # Delete the like
+
+    return Response({"detail": "Post unliked."}, status=status.HTTP_204_NO_CONTENT)
