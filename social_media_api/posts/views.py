@@ -2,7 +2,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
-from django.shortcuts import get_object_or_404  # Correct import
+from django.shortcuts import get_object_or_404
 from posts.models import Post, Like
 from notifications.models import Notification
 from django.utils import timezone
@@ -11,7 +11,10 @@ class LikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
+        # Retrieve the post or return 404 if not found
         post = get_object_or_404(Post, pk=pk)
+
+        # Create or retrieve the Like object
         like, created = Like.objects.get_or_create(user=request.user, post=post)
 
         if created:
@@ -26,11 +29,15 @@ class LikePostView(APIView):
 
         return Response({"detail": "Post liked successfully."}, status=201)
 
+
 class UnlikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
+        # Retrieve the post or return 404 if not found
         post = get_object_or_404(Post, pk=pk)
+
+        # Check if the Like object exists, then delete it
         like = Like.objects.filter(user=request.user, post=post).first()
 
         if like:
