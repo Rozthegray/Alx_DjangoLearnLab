@@ -1,58 +1,60 @@
-from django.shortcuts import get_object_or_404  # <-- Ensure this import is added
-from rest_framework import permissions
-from rest_framework.response import Response
+# notifications/views.py
 from rest_framework.views import APIView
-from .models import Post, Like
+from rest_framework.response import Response
+from rest_framework import permissions
 from notifications.models import Notification
 from django.utils import timezone
 
-class LikePostView(APIView):
+class NotificationListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        # Get notifications for the authenticated user
+        notifications = Notification.objects.filter(recipient=request.user).order_by('-timestamp')
+
+        # Serialize notifications data
+        notification_data = [
+            {
+                "id": notification.id,
+                "actor": notification.actor.username,  # or use a field like notification.actor.get_full_name()
+                "verb": notification.verb,
+                "target": str(notification.target),  # You can adjust this as needed, or serialize the target
+                "timestamp": notification.timestamp,
+                "read": notification.read  # Assuming you have a 'read' field
+            }
+            for notification in notifications
+        ]
+
+        return Response(notification_data)
+
+class NotificationReadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        # Retrieve the post or return 404 if not found
-        post = get_object_or_404(Post, pk=pk)
+        # Retrieve the notification
+        notification = Notification.objects.filter(id=pk, recipient=request.user).first()
+        
+        if not notification:
+            return Response({"detail": "Notification not found or not authorized to view this notification."}, status=404)
+        
+        # Mark the notification as read
+        notification.read = True
+        notification.save()
 
-        # Check if the user has already liked the post
-        if Like.objects.filter(post=post, user=request.user).exists():
-            return Response({"detail": "You already liked this post."}, status=400)
+        return Response({"detail": "Notification marked as read."})
 
-        # Create a new Like record
-        Like.objects.create(post=post, user=request.user)
-
-        # Optionally, create a notification
-        Notification.objects.create(
-            recipient=post.author,  # The author of the post
-            actor=request.user,  # The user who liked the post
-            verb="liked",  # Describes the action
-            target=post,  # The post that was liked
-            timestamp=timezone.now()
-        )
-
-        return Response({"detail": "Post liked successfully."}, status=200)
-
-class UnlikePostView(APIView):
+class NotificationUnreadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        # Retrieve the post or return 404 if not found
-        post = get_object_or_404(Post, pk=pk)
+        # Retrieve the notification
+        notification = Notification.objects.filter(id=pk, recipient=request.user).first()
+        
+        if not notification:
+            return Response({"detail": "Notification not found or not authorized to view this notification."}, status=404)
+        
+        # Mark the notification as unread
+        notification.read = False
+        notification.save()
 
-        # Check if the user has liked the post
-        like = Like.objects.filter(post=post, user=request.user).first()
-        if not like:
-            return Response({"detail": "You haven't liked this post."}, status=400)
-
-        # Delete the Like record (unliking the post)
-        like.delete()
-
-        # Optionally, create a notification for unliking
-        Notification.objects.create(
-            recipient=post.author,
-            actor=request.user,
-            verb="unliked",
-            target=post,
-            timestamp=timezone.now()
-        )
-
-        return Response({"detail": "Post unliked successfully."}, status=200)
+        return Response({"detail": "Notification marked as unread."})
