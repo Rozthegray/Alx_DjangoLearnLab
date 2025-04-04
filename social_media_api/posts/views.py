@@ -1,4 +1,3 @@
-# posts/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
@@ -11,7 +10,7 @@ class LikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        # Retrieve the post or return 404 if not found
+        # Use get_object_or_404 to get the post by pk
         post = get_object_or_404(Post, pk=pk)
 
         # Create or retrieve the Like object
@@ -34,7 +33,7 @@ class UnlikePostView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        # Retrieve the post or return 404 if not found
+        # Use get_object_or_404 to get the post by pk
         post = get_object_or_404(Post, pk=pk)
 
         # Check if the Like object exists, then delete it
@@ -44,4 +43,4 @@ class UnlikePostView(APIView):
             like.delete()
             return Response({"detail": "Post unliked successfully."}, status=200)
         else:
-            return Response({"detail": "Like not found."}, status=404)
+            return Response({"
