@@ -1,14 +1,21 @@
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, permissions
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from .models import Post
-from .serializers import PostSerializer
+from accounts.models import CustomUser  # Import CustomUser model
 
-class UserFeedView(generics.ListAPIView):
-    """Returns posts from users that the authenticated user follows."""
-    serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+class FeedView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        user = self.request.user
-        return Post.objects.filter(author__in=user.following.all()).order_by('-created_at')
+    def get(self, request):
+        # Get the list of users the current user follows
+        following_users = request.user.following.all()
+
+        # Retrieve posts from followed users, ordered by creation date (newest first)
+        posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
+
+        # Serialize the posts (assuming you have a PostSerializer)
+        from .serializers import PostSerializer
+        serializer = PostSerializer(posts, many=True)
+
+        return Response(serializer.data)
