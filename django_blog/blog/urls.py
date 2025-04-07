@@ -11,6 +11,15 @@ from .views import (
     CommentUpdateView,
     CommentDeleteView,
 )
+from django.urls import path
+from .views import PostByTagListView
+
+urlpatterns = [
+    # Existing URLs...
+    
+    path('tags/<slug:tag_slug>/', PostByTagListView.as_view(), name='posts_by_tag'),
+]
+
 
 urlpatterns = [
     path('post/<int:pk>/comments/new/', CommentCreateView.as_view(), name='add-comment'),
