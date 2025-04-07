@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.forms import AuthenticationForm
-from .forms import RegisterForm
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required  # ✅ Add this if using function-based views
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin  # ✅ For class-based views
+from django.shortcuts import render
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from .models import Post
+
 
 # Register View
 def register(request):
