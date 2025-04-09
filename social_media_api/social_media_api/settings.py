@@ -16,7 +16,7 @@ ALLOWED_HOSTS = ['your-domain.com']
 # social_media_api/settings.py
 
 INSTALLED_APPS = [
-    ...
+    'posts',
     'rest_framework',
     'rest_framework.authtoken',
     'accounts',
