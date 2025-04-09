@@ -1,23 +1,16 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated  # Import IsAuthenticated permission
+from rest_framework import permissions
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .models import Post, Like
 from notifications.models import Notification
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from .models import Post
 from .serializers import PostSerializer
 
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated  # ✅ Import IsAuthenticated
-from rest_framework.response import Response
-from .models import Post
-from .serializers import PostSerializer
 
 class FeedView(APIView):
     permission_classes = [IsAuthenticated]  # ✅ Apply IsAuthenticated permission to this view
