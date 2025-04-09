@@ -13,17 +13,23 @@ DEBUG = False
 # Allowed hosts (set this to your domain in production)
 ALLOWED_HOSTS = ['your-domain.com']
 
-# Installed apps
+# social_media_api/settings.py
+
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'storages',  # Add storages if using AWS S3 for static files
-    # Other apps you might have
+    ...
+    'rest_framework',
+    'rest_framework.authtoken',
+    'accounts',
 ]
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
+
 
 # Middleware for security and functionality
 MIDDLEWARE = [
