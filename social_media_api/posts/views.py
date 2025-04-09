@@ -7,6 +7,26 @@ from django.shortcuts import get_object_or_404
 from .models import Post, Like
 from notifications.models import Notification
 from django.contrib.contenttypes.models import ContentType
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import Post
+from .serializers import PostSerializer
+
+class FeedView(APIView):
+    permission_classes = [IsAuthenticated]  # ✅ Enforcing authentication
+
+    def get(self, request):
+        # Get the list of users the current user is following
+        following_users = request.user.following.all()
+        
+        # Retrieve posts from the users being followed, ordered by creation date
+        posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
+        
+        # Serialize the posts and return them in the response
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+
 
 # Apply permissions to ensure user is authenticated
 @api_view(['POST'])
