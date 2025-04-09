@@ -10,3 +10,10 @@ urlpatterns = [
     path('', include(router.urls)),
     path('feed/', FeedView.as_view(), name='feed'),
 ]
+from django.urls import path
+from .views import FeedView
+
+urlpatterns = [
+    path('feed/', FeedView.as_view(), name='feed'),  # Ensure this path is included
+]
+
