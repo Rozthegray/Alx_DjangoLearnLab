@@ -13,6 +13,27 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Post
 from .serializers import PostSerializer
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated  # ✅ Correct import of IsAuthenticated
+from .models import Post
+from .serializers import PostSerializer
+
+class FeedView(APIView):
+    permission_classes = [IsAuthenticated]  # ✅ Ensure this line is included
+
+    def get(self, request):
+        # Retrieve the list of users the current user follows
+        following_users = request.user.following.all()
+        
+        # Fetch posts from users that the current user follows, ordered by creation date
+        posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
+        
+        # Serialize the posts and return them as a response
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+
+
 class FeedView(APIView):
     permission_classes = [IsAuthenticated]  # ✅ Enforcing authentication
 
